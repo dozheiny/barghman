@@ -1,0 +1,4 @@
+github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
+github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
+github.com/yaa110/go-persian-calendar v1.2.2 h1:SRx+IsY4xTaSUKKfpvxvU/xrdREz63xUV2kx5zvUCjI=
+github.com/yaa110/go-persian-calendar v1.2.2/go.mod h1:qtnmHCS9u1EiwzzSCSttGoxD5NfV9ZMzymxFCBYmqfg=
