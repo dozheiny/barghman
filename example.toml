@@ -1,0 +1,16 @@
+log_level = -8
+
+[smtp.gmail]
+mail = ""
+host = "smtp.gmail.com"
+port = "587"
+username = ""
+password = ""
+auth_method = "plain"
+identity = ""
+
+
+[clients.blu]
+bill_id = ""
+auth_token = ""
+recipients = [""]
