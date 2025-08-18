@@ -1,7 +1,7 @@
 =============================== Barghman =============================== 
 
 Barghman is a service that connects to Bargh provider and sends calendar
-in ICS format emails with your billing or usage schedule. It can run as
+in ICS format emails with your blackout schedules. It can run as
 a standalone command or as a scheduled service using cron jobs.
 
 ================================ Usage ================================= 
