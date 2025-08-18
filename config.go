@@ -20,10 +20,12 @@ type SMTP struct {
 	Mail       string         `toml:"mail"`
 	Address    string         `toml:"host"`
 	Port       string         `toml:"port"`
+	From       string         `toml:"from"`
 	Username   string         `toml:"username"`
 	Password   string         `toml:"password"`
 	AuthMethod smtpAuthMethod `toml:"auth_method"`
 	Identity   string         `toml:"identity"`
+	SkipTLS    bool           `toml:"skip_tls"`
 }
 
 type Clients struct {
@@ -35,8 +37,9 @@ type Clients struct {
 type smtpAuthMethod string
 
 const (
-	smtpAuthMethodPlain smtpAuthMethod = "plain"
-	smtpAuthMethodMD5   smtpAuthMethod = "md5"
+	smtpAuthMethodPlain  smtpAuthMethod = "plain"
+	smtpAuthMethodMD5    smtpAuthMethod = "md5"
+	smtpAuthMethodCustom smtpAuthMethod = "custom"
 )
 
 func ParseConfig() (*Config, error) {

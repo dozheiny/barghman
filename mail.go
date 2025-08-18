@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
+	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/smtp"
 	"strings"
 	"time"
@@ -32,7 +35,7 @@ var (
 		"SUMMARY:%s\r\n" + // Summary.
 		"DESCRIPTION:%s\r\n" + // Event details.
 		"LOCATION:%s\r\n" + // Location.
-		"ORGANIZER;CN=Barghman:mailto:%s\r\n" // Organizer.
+		"ORGANIZER;CN=Iliya:mailto:%s\r\n" // Organizer.
 
 	CalendarAttendanceFormat = "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:%s\r\n"
 
@@ -54,6 +57,9 @@ func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
 	case smtpAuthMethodPlain:
 		auth = smtp.PlainAuth(config.Identity, config.Username, config.Password, config.Address)
 
+	case smtpAuthMethodCustom:
+		auth = LoginAuth(config.Username, config.Password)
+
 	default:
 		return nil, fmt.Errorf("invalid auth method")
 	}
@@ -61,12 +67,12 @@ func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
 	return &Mail{Auth: auth, Config: config, Loc: loc}, nil
 }
 
-func (m *Mail) Send(data []Data, recipients []string) error {
+func (m *Mail) Do(data []Data, recipients []string) error {
 	boundary := generateBoundary()
 
 	var content strings.Builder
 	if _, err := content.WriteString(fmt.Sprintf(MailHeadersFormat,
-		m.Config.Username,
+		m.Config.From,
 		m.Config.Mail,
 		strings.Join(recipients, ","),
 		boundary,
@@ -88,7 +94,7 @@ func (m *Mail) Send(data []Data, recipients []string) error {
 		}
 
 		if _, err := content.WriteString(fmt.Sprintf(CalendarBodyFormat,
-			fmt.Sprintf("%d@barghman.net", d.OutageNumber),
+			fmt.Sprintf("%d", d.OutageNumber),
 			time.Now().UTC().Format(timeFormat),
 			startDate.UTC().Format(timeFormat),
 			endDate.UTC().Format(timeFormat),
@@ -121,5 +127,83 @@ func (m *Mail) Send(data []Data, recipients []string) error {
 	cont := content.String()
 	slog.Debug("content generated", "content", cont)
 
-	return smtp.SendMail(fmt.Sprintf("%s:%s", m.Config.Address, m.Config.Port), m.Auth, m.Config.Mail, recipients, []byte(cont))
+	// return smtp.SendMail(fmt.Sprintf("%s:%s", m.Config.Address, m.Config.Port), m.Auth, m.Config.Mail, recipients, []byte(cont))
+	return m.Send(cont, recipients)
+}
+
+func (m Mail) Send(msg string, recipients []string) error {
+	conn, err := net.Dial("tcp", net.JoinHostPort(m.Config.Address, m.Config.Port))
+	if err != nil {
+		slog.Error("can't dial the server", "error", err, "address", m.Config.Address)
+		return err
+	}
+
+	client, err := smtp.NewClient(conn, m.Config.Address)
+	if err != nil {
+		slog.Error("smtp new client failed", "error", err, "address", m.Config.Address)
+		return err
+	}
+
+	if err := client.StartTLS(&tls.Config{ServerName: m.Config.Address, InsecureSkipVerify: m.Config.SkipTLS}); err != nil {
+		slog.Error("can't start TLS", "error", err)
+		return err
+	}
+
+	if err := client.Auth(m.Auth); err != nil {
+		slog.Error("client auth failed", "error", err)
+		return err
+	}
+
+	if err := client.Mail(m.Config.Mail); err != nil {
+		slog.Error("client mail failed", "error", err)
+		return err
+	}
+
+	for _, r := range recipients {
+		if err := client.Rcpt(r); err != nil {
+			slog.Error("client rcpt failed", "error", err, "rcpt", r)
+			return err
+		}
+	}
+
+	writer, err := client.Data()
+	if err != nil {
+		slog.Error("client data writer failed", "error", err)
+		return err
+	}
+
+	defer writer.Close()
+
+	if _, err := writer.Write([]byte(msg)); err != nil {
+		slog.Error("writer.Write failed", "error", err)
+		return err
+	}
+
+	return client.Quit()
+}
+
+type loginAuth struct {
+	username, password string
+}
+
+func LoginAuth(username, password string) smtp.Auth {
+	return &loginAuth{username, password}
+}
+
+func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", []byte(a.username), nil
+}
+
+func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
+	if more {
+		switch string(fromServer) {
+		case "Username:":
+			return []byte(a.username), nil
+		case "Password:":
+			return []byte(a.password), nil
+		default:
+			return nil, errors.New("unkown fromServer")
+		}
+	}
+	return nil, nil
 }

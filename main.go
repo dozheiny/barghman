@@ -41,7 +41,7 @@ func main() {
 			continue
 		}
 
-		if err := mail.Send(data, client.Recipients); err != nil {
+		if err := mail.Do(data, client.Recipients); err != nil {
 			slog.Error("failed to send mail", "error", err)
 			continue
 		}
