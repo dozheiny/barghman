@@ -161,11 +161,9 @@ func (m Mail) Send(msg string, recipients []string) error {
 		return err
 	}
 
-	for _, r := range recipients {
-		if err := client.Rcpt(r); err != nil {
-			slog.Error("client rcpt failed", "error", err, "rcpt", r)
-			return err
-		}
+	if err := client.Rcpt(m.Config.Mail); err != nil {
+		slog.Error("client rcpt failed", "error", err)
+		return err
 	}
 
 	writer, err := client.Data()
