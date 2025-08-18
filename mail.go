@@ -36,13 +36,6 @@ var (
 
 	CalendarAttendanceFormat = "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:%s\r\n"
 
-	PlainTextBodyFormat = "--%s\r\n" +
-		"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
-		"Content-Transfer-Encoding: 7bit\r\n\r\n" +
-		"Dear colleague,\r\n\r\n" +
-		"Please note the planned power outages below.\r\n" +
-		"You can also add them directly to your calendar using the attached invitation.\r\n\r\n"
-
 	timeFormat = "20060102T150405Z"
 )
 
@@ -79,11 +72,6 @@ func (m *Mail) Send(data []Data, recipients []string) error {
 		boundary,
 	)); err != nil {
 		slog.Error("Failed to write string", "error", err)
-		return err
-	}
-
-	if _, err := content.WriteString(fmt.Sprintf(PlainTextBodyFormat, boundary)); err != nil {
-		slog.Error("Failed to write plain text body", "error", err)
 		return err
 	}
 

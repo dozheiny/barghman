@@ -96,6 +96,8 @@ func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, e
 		return nil, err
 	}
 
+	slog.Debug("response of barghman", "body", string(respbody))
+
 	var plannedBlackOutResponse PlannedBlackOutResponse
 	if err := json.Unmarshal(respbody, &plannedBlackOutResponse); err != nil {
 		slog.Error("failed to decode response", "error", err)
