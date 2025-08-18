@@ -1,14 +1,13 @@
 =============================== Barghman =============================== 
 
-Barghman is a service that connects to your electricity provider and se-
-nds calendar (ICS format) emails with your billing or usage schedule.
-It can run as a standalone command or as a scheduled service using cron
-jobs.
+Barghman is a service that connects to Bargh provider and sends calendar
+in ICS format emails with your billing or usage schedule. It can run as
+a standalone command or as a scheduled service using cron jobs.
 
 ================================ Usage ================================= 
 	barghman -file <config file>
 
--f <config file>: Path to your TOML configuration file.
+-file <config file>: Path to your TOML configuration file.
 
 =============================== Building =============================== 
 
@@ -24,17 +23,17 @@ This will compile the barghman binary for your system.
 rmation.
 
 3. Run barghman with the config file:
-	barghman -f example.toml
+	barghman -file example.toml
 
 ========================== Config File Format ========================== 
 
 General Options
 
-| Option      | Default | Description                                                                                        |
-| ----------- | ------- | -------------------------------------------------------------------------------------------------- |
-| `log_level` | `0`     | Logger verbosity level. Higher numbers show more detailed logs; negative numbers reduce verbosity. |
-| `cron_job`  | `""`    | Cron expression for scheduling the service (e.g., `@daily`, `0 30 2 * * *`).                       |
-| `use_cron`  | `false` | Set to `true` if you want Barghman to run automatically according to `cron_job`.                   |
+| Option      | Default | Description                                                                      |
+| ----------- | ------- | ---------------------------------------------------------------------------------|
+| `log_level` | `0`     | Logger verbosity level.                                                          |
+| `cron_job`  | `""`    | Cron expression for scheduling the service (e.g., `@daily`, `0 30 2 * * *`).     |
+| `use_cron`  | `false` | Set to `true` if you want Barghman to run automatically according to `cron_job`. |
 
 
 SMTP Configuration
