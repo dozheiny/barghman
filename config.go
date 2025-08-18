@@ -37,7 +37,7 @@ type smtpAuthMethod string
 
 const (
 	smtpAuthMethodPlain  smtpAuthMethod = "plain"
-	smtpAuthMethodMD5    smtpAuthMethod = "md5"
+	smtpAuthMethodMD5    smtpAuthMethod = "cram-md5"
 	smtpAuthMethodCustom smtpAuthMethod = "custom"
 )
 

@@ -48,7 +48,7 @@ Each mail provider can be configured under [smtp.<provider>].
 | `port`        | SMTP server port.                                                       |
 | `username`    | Username for SMTP authentication.                                       |
 | `password`    | Password for SMTP authentication.                                       |
-| `auth_method` | Authentication method (`plain`, `login`, `cram-md5`, etc.).             |
+| `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`).				  |
 | `identity`    | Optional identity for authentication.                                   |
 | `skip_tls`    | Set to `true` to skip TLS verification (not recommended in production). |
 
