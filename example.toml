@@ -8,9 +8,9 @@ username = ""
 password = ""
 auth_method = "plain"
 identity = ""
+skip_tls = true
 
-
-[clients.blu]
+[clients.my_client]
 bill_id = ""
 auth_token = ""
 recipients = [""]
