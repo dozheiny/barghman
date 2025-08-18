@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
@@ -34,17 +36,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, client := range config.Clients {
-		data, err := PlannedBlackOut(context.Background(), client.AuthToken, client.BillID, time.Now().AddDate(0, 0, -7), time.Now().AddDate(0, 0, -7))
-		if err != nil {
-			slog.Error("plannedBlackOut failed", "error", err)
-			continue
-		}
+	job := func() {
+		for _, client := range config.Clients {
+			data, err := PlannedBlackOut(context.Background(), client.AuthToken, client.BillID, time.Now().AddDate(0, 0, -7), time.Now().AddDate(0, 0, -7))
+			if err != nil {
+				slog.Error("plannedBlackOut failed", "error", err)
+				continue
+			}
 
-		if err := mail.Do(data, client.Recipients); err != nil {
-			slog.Error("failed to send mail", "error", err)
-			continue
-		}
+			if err := mail.Do(data, client.Recipients); err != nil {
+				slog.Error("failed to send mail", "error", err)
+				continue
+			}
 
+		}
 	}
+
+	if !config.UseCron {
+		job()
+		return
+	}
+
+	c := cron.New(cron.WithLocation(location))
+	if _, err := c.AddFunc(config.CronJob, job); err != nil {
+		slog.Error("couldn't add to the cron job", "error", err)
+		os.Exit(1)
+	}
+
+	defer c.Stop()
+	c.Start()
+
+	select {}
 }

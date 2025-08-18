@@ -12,6 +12,8 @@ var ErrGoogleCredentialsFilePathRequired = errors.New("google credentials file p
 
 type Config struct {
 	LogLevel int                `toml:"log_level"`
+	CronJob  string             `toml:"cron_job"`
+	UseCron  bool               `toml:"use_cron"`
 	Clients  map[string]Clients `toml:"clients"`
 	SMTP     map[string]SMTP    `toml:"smtp"`
 }
