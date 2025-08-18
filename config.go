@@ -1,14 +1,11 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	_ "time/tzdata"
 
 	"github.com/BurntSushi/toml"
 )
-
-var ErrGoogleCredentialsFilePathRequired = errors.New("google credentials file path is required")
 
 type Config struct {
 	LogLevel int                `toml:"log_level"`
