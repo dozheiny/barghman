@@ -14,6 +14,7 @@ import (
 var (
 	MailHeadersFormat = "From: %s <%s>\r\n" + // Name and Email
 		"To: %s\r\n" + // To.
+		"Bcc: %s\r\n" + // Bcc.
 		"Subject: Power Outage\r\n" + // Subject.
 		"MIME-Version: 1.0\r\n" + // MIME-Version.
 		"Content-Type: multipart/alternative; boundary=\"%s\"\r\n\r\n" // Boundary.
@@ -73,6 +74,7 @@ func (m *Mail) Do(data []Data, recipients []string) error {
 	var content strings.Builder
 	if _, err := content.WriteString(fmt.Sprintf(MailHeadersFormat,
 		m.Config.From,
+		m.Config.Mail,
 		m.Config.Mail,
 		strings.Join(recipients, ","),
 		boundary,
