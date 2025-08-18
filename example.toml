@@ -1,6 +1,6 @@
 log_level = -8
 cron_job = "@daily"
-use_cron = false
+use_crn = false
 
 [smtp.gmail]
 mail = ""
