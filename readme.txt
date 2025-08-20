@@ -98,3 +98,5 @@ Each client represents a connection to an electricity service account.
 
 ios.barghman.com changes their calendar schedule several times, so maybe
 It's better to handle it with caching
+
+PS: THIS BUG IS FIXED IN `34da5cf` commit
