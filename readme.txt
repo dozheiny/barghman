@@ -93,6 +93,7 @@ Each client represents a connection to an electricity service account.
 - [ ] Make file creator customizable(toml or json)
 - [ ] Move main file to cmd directory
 - [ ] Save logs
+- [ ] Add delete cache functionality 
 
 ============================= Known Bugs =============================
 
