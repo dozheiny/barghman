@@ -36,11 +36,12 @@ var (
 		"SUMMARY:%s\r\n" + // Summary.
 		"DESCRIPTION:%s\r\n" + // Event details.
 		"LOCATION:%s\r\n" + // Location.
+		"SEQUENCE:%d\r\n" +
 		"ORGANIZER;CN=Iliya:mailto:%s\r\n" // Organizer.
 
 	CalendarAttendanceFormat = "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:%s\r\n"
 
-	timeFormat = "20060102T150405Z"
+	emailTimeFormat = "20060102T150405Z"
 )
 
 type Mail struct {
@@ -68,7 +69,7 @@ func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
 	return &Mail{Auth: auth, Config: config, Loc: loc}, nil
 }
 
-func (m *Mail) Do(data []Data, recipients []string) error {
+func (m *Mail) Do(fc *FileContent) error {
 	boundary := generateBoundary()
 
 	var content strings.Builder
@@ -76,7 +77,7 @@ func (m *Mail) Do(data []Data, recipients []string) error {
 		m.Config.From,
 		m.Config.Mail,
 		m.Config.Mail,
-		strings.Join(recipients, ","),
+		strings.Join(fc.Recipients, ","),
 		boundary,
 	)); err != nil {
 		slog.Error("Failed to write string", "error", err)
@@ -88,38 +89,31 @@ func (m *Mail) Do(data []Data, recipients []string) error {
 		return err
 	}
 
-	for _, d := range data {
-		startDate, endDate, err := d.ParseTime(m.Loc)
-		if err != nil {
-			slog.Error("Failed to parse time", "error", err)
-			continue
-		}
+	if _, err := content.WriteString(fmt.Sprintf(CalendarBodyFormat,
+		fmt.Sprintf("%d", fc.OutageNumber),
+		time.Now().UTC().Format(emailTimeFormat),
+		fc.StartOutageDateTime.UTC().Format(emailTimeFormat),
+		fc.EndOutageDateTime.UTC().Format(emailTimeFormat),
+		fc.Summary(),
+		fc.Description(),
+		fc.Address,
+		fc.Sequence,
+		m.Config.Mail,
+	)); err != nil {
+		slog.Error("Failed to write event body", "error", err)
+		return err
+	}
 
-		if _, err := content.WriteString(fmt.Sprintf(CalendarBodyFormat,
-			fmt.Sprintf("%d", d.OutageNumber),
-			time.Now().UTC().Format(timeFormat),
-			startDate.UTC().Format(timeFormat),
-			endDate.UTC().Format(timeFormat),
-			d.Summary(),
-			d.Description(),
-			d.Address,
-			m.Config.Mail,
-		)); err != nil {
-			slog.Error("Failed to write event body", "error", err)
+	for _, recipient := range fc.Recipients {
+		if _, err := content.WriteString(fmt.Sprintf(CalendarAttendanceFormat, recipient)); err != nil {
+			slog.Error("Failed to write recipient", "error", err)
 			return err
 		}
+	}
 
-		for _, recipient := range recipients {
-			if _, err := content.WriteString(fmt.Sprintf(CalendarAttendanceFormat, recipient)); err != nil {
-				slog.Error("Failed to write recipient", "error", err)
-				return err
-			}
-		}
-
-		if _, err := content.WriteString(CalendarFooterContent); err != nil {
-			slog.Error("Failed to write event-footer", "error", err)
-			return err
-		}
+	if _, err := content.WriteString(CalendarFooterContent); err != nil {
+		slog.Error("Failed to write event-footer", "error", err)
+		return err
 	}
 
 	if _, err := content.WriteString(fmt.Sprintf(CalendarEndContent, boundary)); err != nil {
@@ -129,8 +123,7 @@ func (m *Mail) Do(data []Data, recipients []string) error {
 	cont := content.String()
 	slog.Debug("content generated", "content", cont)
 
-	// return smtp.SendMail(fmt.Sprintf("%s:%s", m.Config.Address, m.Config.Port), m.Auth, m.Config.Mail, recipients, []byte(cont))
-	return m.Send(cont, recipients)
+	return m.Send(cont, fc.Recipients)
 }
 
 func (m Mail) Send(msg string, recipients []string) error {
@@ -179,7 +172,8 @@ func (m Mail) Send(msg string, recipients []string) error {
 		return err
 	}
 
-	return client.Quit()
+	client.Quit()
+	return nil
 }
 
 type loginAuth struct {

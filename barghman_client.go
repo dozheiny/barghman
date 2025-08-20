@@ -112,6 +112,26 @@ func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, e
 	return plannedBlackOutResponse.Data, nil
 }
 
+func (d Data) ToFileContent(loc *time.Location, billID string, recipients []string, sequence uint) (*FileContent, error) {
+	startDate, endDate, err := d.ParseTime(loc)
+	if err != nil {
+		slog.Error("Failed to parse data time", "error", err)
+		return nil, err
+	}
+
+	return &FileContent{
+		UID:                 fmt.Sprintf("%s_%d_%s", billID, d.OutageNumber, startDate.Format(time.DateOnly)),
+		BillID:              billID,
+		Sequence:            sequence,
+		OutageNumber:        d.OutageNumber,
+		StartOutageDateTime: startDate,
+		EndOutageDateTime:   endDate,
+		Recipients:          recipients,
+		Address:             d.Address,
+		ReasonOutage:        d.ReasonOutage,
+	}, nil
+}
+
 func (d Data) ParseTime(loc *time.Location) (time.Time, time.Time, error) {
 	outdateDate := strings.Split(d.OutageDate, "/")
 	if len(outdateDate) != 3 {
@@ -177,13 +197,4 @@ func (d Data) ParseTime(loc *time.Location) (time.Time, time.Time, error) {
 	stopDate := ptime.Date(year, ptime.Month(month), day, stopHour, stopMinute, 0, 0, loc)
 
 	return startDate.Time(), stopDate.Time(), nil
-}
-
-func (d Data) Description() string {
-	return strings.ReplaceAll(fmt.Sprintf("Blackout!\nAddress: %s\nDate: %s\nFrom %s until %s\nReason: %s",
-		d.Address, d.OutageDate, d.OutageStartTime, d.OutageStopTime, d.ReasonOutage), "\n", "\\n")
-}
-
-func (d Data) Summary() string {
-	return fmt.Sprintf("Power Outage on %s", d.Address)
 }
