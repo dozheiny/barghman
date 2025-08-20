@@ -94,10 +94,6 @@ Each client represents a connection to an electricity service account.
 - [ ] Move main file to cmd directory
 - [ ] Save logs
 - [ ] Add delete cache functionality 
+- [ ] Add content to the email about what this email, why you receive it,
+	 and how to add it to their calendars, etc.
 
-============================= Known Bugs =============================
-
-ios.barghman.com changes their calendar schedule several times, so maybe
-It's better to handle it with caching
-
-PS: THIS BUG IS FIXED IN `34da5cf` commit
