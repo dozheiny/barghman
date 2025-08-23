@@ -11,6 +11,7 @@ type Config struct {
 	LogLevel int                `toml:"log_level"`
 	CronJob  string             `toml:"cron_job"`
 	UseCron  bool               `toml:"use_cron"`
+	WaitTime int                `toml:"wait_time"` // based on second.
 	Clients  map[string]Clients `toml:"clients"`
 	SMTP     map[string]SMTP    `toml:"smtp"`
 }

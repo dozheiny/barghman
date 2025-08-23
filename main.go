@@ -130,6 +130,7 @@ func main() {
 				}
 			}
 
+			time.Sleep(time.Second * time.Duration(config.WaitTime))
 		}
 	}
 
