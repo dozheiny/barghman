@@ -1,0 +1,29 @@
+[Unit]
+Description=Barghman Service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart={{INSTALL_PATH}}/barghman -file {{CONFIG_PATH}}/config.toml
+Restart=always
+RestartSec=5
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths={{CONFIG_PATH}}
+ReadWritePaths={{CACHE_PATH}}
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=barghman
+
+[Install]
+WantedBy=default.target
