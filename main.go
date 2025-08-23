@@ -132,6 +132,8 @@ func main() {
 
 			time.Sleep(time.Second * time.Duration(config.WaitTime))
 		}
+
+		slog.Debug("all clients sent, waiting for next cron cycle")
 	}
 
 	if !config.UseCron {
