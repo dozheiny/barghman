@@ -56,7 +56,7 @@ Each mail provider can be configured under [smtp.<provider>].
 | `password`    | Password for SMTP authentication.                                       |
 | `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`).				  |
 | `identity`    | Optional identity for authentication.                                   |
-| `skip_tls`    | Set to `true` to skip TLS verification (not recommended for production). |
+| `skip_tls`    | Set to `true` to skip TLS verification (not recommended for production).|
 
 
 Example:
