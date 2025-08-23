@@ -1,0 +1,38 @@
+{
+    "TimeStamp": "2025-08-23T14:00:53.636311442+03:30",
+    "status": 200,
+    "message": "تعداد2خاموشی پیدا شد",
+    "data": [
+        {
+            "reg_date": "",
+            "registrar": "",
+            "reason_outage": "مدیریت انرژی",
+            "outage_date": "1404/06/01",
+            "outage_time": "13:00",
+            "outage_start_time": "13:00",
+            "outage_stop_time": "15:00",
+            "is_planned": false,
+            "address": "HOME SWEET HOME",
+            "outage_address": "",
+            "city": 0,
+            "outage_number": 218775,
+            "tracking_code": 0
+        },
+        {
+            "reg_date": "",
+            "registrar": "",
+            "reason_outage": "مدیریت انرژی",
+            "outage_date": "1404/06/01",
+            "outage_time": "09:00",
+            "outage_start_time": "09:00",
+            "outage_stop_time": "11:00",
+            "is_planned": false,
+            "address": "HOME SWEET HOME",
+            "outage_address": "",
+            "city": 0,
+            "outage_number": 218775,
+            "tracking_code": 0
+        }
+    ],
+    "error": null
+}

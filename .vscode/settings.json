@@ -6,6 +6,7 @@
         "godotenv",
         "Organaizer",
         "PRODID",
+        "ptime",
         "respbody",
         "timelayout",
         "VCALENDAR"

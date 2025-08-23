@@ -62,7 +62,7 @@ func main() {
 	job := func() {
 		slog.Debug("job started")
 
-		for _, c := range config.Clients {
+		for subject, c := range config.Clients {
 			data, err := PlannedBlackOut(context.Background(), c.AuthToken, c.BillID, time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, 5))
 			if err != nil {
 				slog.Error("plannedBlackOut failed", "error", err)
@@ -120,7 +120,7 @@ func main() {
 					continue
 				}
 
-				if err := mail.Do(fcf); err != nil {
+				if err := mail.Do(fcf, subject); err != nil {
 					slog.Error("Failed to send mail", "error", err)
 					continue
 				}

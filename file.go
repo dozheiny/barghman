@@ -19,6 +19,7 @@ type FileContent struct {
 	BillID              string    `json:"bill_id" toml:"bill_id"`
 	Sequence            uint      `json:"sequence" toml:"sequence"`
 	OutageNumber        int       `json:"outage_number" toml:"outage_number"`
+	FarsiOutageDate     string    `json:"farsi_outage_date" toml:"farsi_outage_date"`
 	StartOutageDateTime time.Time `json:"start_outage_datetime" toml:"outage_datetime"`
 	EndOutageDateTime   time.Time `json:"end_outage_datetime" toml:"end_outage_datetime"`
 	Recipients          []string  `json:"recipients" toml:"recipients"`

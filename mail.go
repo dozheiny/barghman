@@ -15,7 +15,7 @@ var (
 	MailHeadersFormat = "From: %s <%s>\r\n" + // Name and Email
 		"To: %s\r\n" + // To.
 		"Bcc: %s\r\n" + // Bcc.
-		"Subject: Power Outage\r\n" + // Subject.
+		"Subject: Scheduled Power Outage on %s - %s\r\n" + // Subject.
 		"MIME-Version: 1.0\r\n" + // MIME-Version.
 		"Content-Type: multipart/alternative; boundary=\"%s\"\r\n\r\n" // Boundary.
 
@@ -69,7 +69,7 @@ func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
 	return &Mail{Auth: auth, Config: config, Loc: loc}, nil
 }
 
-func (m *Mail) Do(fc *FileContent) error {
+func (m *Mail) Do(fc *FileContent, subject string) error {
 	boundary := generateBoundary()
 
 	var content strings.Builder
@@ -78,6 +78,8 @@ func (m *Mail) Do(fc *FileContent) error {
 		m.Config.Mail,
 		m.Config.Mail,
 		strings.Join(fc.Recipients, ","),
+		subject,
+		fc.FarsiOutageDate,
 		boundary,
 	)); err != nil {
 		slog.Error("Failed to write string", "error", err)

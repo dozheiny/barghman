@@ -126,6 +126,7 @@ func (d Data) ToFileContent(loc *time.Location, billID string, recipients []stri
 		BillID:              billID,
 		Sequence:            sequence,
 		OutageNumber:        d.OutageNumber,
+		FarsiOutageDate:     d.OutageDate,
 		StartOutageDateTime: startDate,
 		EndOutageDateTime:   endDate,
 		Recipients:          recipients,
