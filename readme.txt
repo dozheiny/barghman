@@ -1,8 +1,16 @@
 =============================== Barghman =============================== 
 
-Barghman is a service that connects to Bargh provider and sends calendar
-in ICS format emails with your blackout schedules. It can run as
-a standalone command or as a scheduled service using cron jobs.
+Barghman is a service that connects to the Power electricity provider 
+and sends calendar emails in ICS format with your blackout schedules.
+It can run as a standalone command or as a scheduled service using cron 
+jobs.
+
+============================= Installation ==============================
+
+	git clone git@github.com:dozheiny/barghman.git
+	cd barghman
+	make install
+
 
 ================================ Usage ================================= 
 	barghman -file <config file>
@@ -19,8 +27,7 @@ This will compile the barghman binary for your system.
 
 =============================== Running ================================
 1. Create a TOML configuration file, e.g., example.toml.
-2. Update the file with your credentials, SMTP details, and client info-
-rmation.
+2. Update the file with your credentials, SMTP details, and client information.
 
 3. Run barghman with the config file:
 	barghman -file example.toml
@@ -49,7 +56,7 @@ Each mail provider can be configured under [smtp.<provider>].
 | `password`    | Password for SMTP authentication.                                       |
 | `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`).				  |
 | `identity`    | Optional identity for authentication.                                   |
-| `skip_tls`    | Set to `true` to skip TLS verification (not recommended in production). |
+| `skip_tls`    | Set to `true` to skip TLS verification (not recommended for production). |
 
 
 Example:
@@ -71,7 +78,7 @@ Client Configuration:
 Each client represents a connection to an electricity service account.
 | Option       | Description                                                 |
 | ------------ | ----------------------------------------------------------- |
-| `bill_id`    | Unique identifier of your electricity bill.                 |
+| `bill_id`    | Unique identifier for your electricity bill.                |
 | `auth_token` | Authentication token provided by https://ios.barghman.com.  |
 | `recipients` | List of email addresses to send the calendar emails to.     |
 
@@ -80,20 +87,19 @@ Each client represents a connection to an electricity service account.
 
 =============================== TO-DO ===============================
 
-- [ ] Make integration with systemd
-- [ ] Add some documents(man)
-- [ ] `make install,uninstall,clean` command
+- [x] Make integration with systemd
+- [ ] Add some documentation (man pages)
+- [x] `make install,uninstall,clean` commands
 - [ ] Add dockerfile
-- [ ] Add it into AUR and brew
+- [ ] Add it to AUR and brew
 - [ ] Update readme with markdown
-- [ ] Maybe support for custom notification(sms maybe?)
-- [ ] Add support for multi bill ids
+- [ ] Maybe support for custom notifications (SMS maybe?)
+- [ ] Add support for multiple bill IDs
 - [ ] Add support for multiple origin emails
 - [ ] Move auth token outside
-- [ ] Make file creator customizable(toml or json)
+- [ ] Make file creator customizable (TOML or JSON)
 - [ ] Move main file to cmd directory
-- [ ] Save logs
 - [ ] Add delete cache functionality 
-- [ ] Add content to the email about what this email, why you receive it,
-	 and how to add it to their calendars, etc.
-
+- [ ] Add content to the email about what this email is, why you receive it,
+	 and how to add it to calendars, etc.
+- [ ] Add install.bash script (not only makefile, no required installed golang)
