@@ -55,6 +55,8 @@ type Data struct {
 }
 
 func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, endDate time.Time) ([]Data, error) {
+	slog.Debug("going to call blackout", "from time", startDate.String(), "to time", endDate.String())
+
 	payload := PlannedBlackoutRequest{
 		BillID:   billID,
 		FromDate: ptime.New(startDate).Format("YYYY/MM/DD"),
@@ -85,11 +87,6 @@ func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, e
 
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		slog.Error("unexpected status code", "status_code", response.StatusCode)
-		return nil, ErrUnexpectedStatusCode
-	}
-
 	respbody, err := io.ReadAll(response.Body)
 	if err != nil {
 		slog.Error("failed to read response body", "error", err)
@@ -97,6 +94,11 @@ func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, e
 	}
 
 	slog.Debug("response of barghman", "body", string(respbody))
+
+	if response.StatusCode != http.StatusOK {
+		slog.Error("unexpected status code", "status_code", response.StatusCode)
+		return nil, ErrUnexpectedStatusCode
+	}
 
 	var plannedBlackOutResponse PlannedBlackOutResponse
 	if err := json.Unmarshal(respbody, &plannedBlackOutResponse); err != nil {

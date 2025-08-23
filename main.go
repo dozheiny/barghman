@@ -60,8 +60,10 @@ func main() {
 	}
 
 	job := func() {
+		slog.Debug("job started")
+
 		for _, c := range config.Clients {
-			data, err := PlannedBlackOut(context.Background(), c.AuthToken, c.BillID, time.Now().AddDate(0, 0, -7), time.Now().AddDate(0, 0, -7))
+			data, err := PlannedBlackOut(context.Background(), c.AuthToken, c.BillID, time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, 5))
 			if err != nil {
 				slog.Error("plannedBlackOut failed", "error", err)
 				continue
@@ -92,9 +94,6 @@ func main() {
 					slog.Error("scanner returns error", "error", err)
 					continue
 				}
-
-				
-				slog.Debug("length of file", "length", len(fileData))
 
 				fcf := new(FileContent)
 				var sequence uint

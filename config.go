@@ -8,12 +8,11 @@ import (
 )
 
 type Config struct {
-	LogLevel int    `toml:"log_level"`
-	CronJob  string `toml:"cron_job"`
-	UseCron  bool   `toml:"use_cron"`
-	//	CachePathDir string             `toml:"cache_path_dir"`
-	Clients map[string]Clients `toml:"clients"`
-	SMTP    map[string]SMTP    `toml:"smtp"`
+	LogLevel int                `toml:"log_level"`
+	CronJob  string             `toml:"cron_job"`
+	UseCron  bool               `toml:"use_cron"`
+	Clients  map[string]Clients `toml:"clients"`
+	SMTP     map[string]SMTP    `toml:"smtp"`
 }
 
 type SMTP struct {
