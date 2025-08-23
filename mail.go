@@ -17,12 +17,20 @@ var (
 		"Bcc: %s\r\n" + // Bcc.
 		"Subject: Scheduled Power Outage on %s - %s\r\n" + // Subject.
 		"MIME-Version: 1.0\r\n" + // MIME-Version.
-		"Content-Type: multipart/alternative; boundary=\"%s\"\r\n\r\n" // Boundary.
+		"Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\n" // Boundary.
 
 	CalendarHeaderContent = "--%s\r\n" +
 		"Content-Type: text/calendar; method=REQUEST; charset=\"UTF-8\"\r\n" +
-		"Content-Transfer-Encoding: 7bit\r\n\r\n" +
+		"Content-Transfer-Encoding: 7bit\r\n" +
+		"Content-Disposition: inline; filename=\"invite.ics\"\r\n\r\n" +
 		"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Blu//Barghman Calendar//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:REQUEST\r\n"
+
+		/*
+			textContent = "--%s\r\n" + // boundary
+				"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
+				"Content-Transfer-Encoding: 7bit\r\n\r\n" +
+				"This is a test email for barghman service\r\n\r\n"
+		*/
 
 	CalendarFooterContent = "STATUS:CONFIRMED\r\nTRANSP:OPAQUE\r\nPRIORITY:5\r\nEND:VEVENT\r\n\r\n"
 
@@ -37,7 +45,7 @@ var (
 		"DESCRIPTION:%s\r\n" + // Event details.
 		"LOCATION:%s\r\n" + // Location.
 		"SEQUENCE:%d\r\n" +
-		"ORGANIZER;CN=Iliya:mailto:%s\r\n" // Organizer.
+		"ORGANIZER;CN=\"Iliya\":mailto:%s\r\n" // Organizer.
 
 	CalendarAttendanceFormat = "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:%s\r\n"
 
@@ -85,6 +93,13 @@ func (m *Mail) Do(fc *FileContent, subject string) error {
 		slog.Error("Failed to write string", "error", err)
 		return err
 	}
+
+	/*
+		if _, err := content.WriteString(fmt.Sprintf(textContent, boundary)); err != nil {
+			slog.Error("Failed to write text content", "error", err)
+			return err
+		}
+	*/
 
 	if _, err := content.WriteString(fmt.Sprintf(CalendarHeaderContent, boundary)); err != nil {
 		slog.Error("Failed to write calendar header content", "error", err)
@@ -156,9 +171,11 @@ func (m Mail) Send(msg string, recipients []string) error {
 		return err
 	}
 
-	if err := client.Rcpt(m.Config.Mail); err != nil {
-		slog.Error("client rcpt failed", "error", err)
-		return err
+	for _, rec := range recipients {
+		if err := client.Rcpt(rec); err != nil {
+			slog.Error("client rcpt failed", "error", err)
+			return err
+		}
 	}
 
 	writer, err := client.Data()
@@ -174,7 +191,7 @@ func (m Mail) Send(msg string, recipients []string) error {
 		return err
 	}
 
-	client.Quit()
+	slog.Error("client quit error failed", "error", client.Quit())
 	return nil
 }
 

@@ -64,5 +64,5 @@ func (f *FileContent) Summary() string {
 
 func (f *FileContent) Description() string {
 	return strings.ReplaceAll(fmt.Sprintf("Blackout!\nAddress: %s\nDate: %s\nFrom %s until %s\nReason: %s",
-		f.Address, ptime.New(f.StartOutageDateTime).Format("YYYY/MM/DD"), f.StartOutageDateTime.Format(time.TimeOnly), f.EndOutageDateTime.Format(time.TimeOnly), f.ReasonOutage), "\n", "\\n")
+		f.Address, ptime.New(f.StartOutageDateTime).Format("yyyy/MM/dd"), f.StartOutageDateTime.Format(time.TimeOnly), f.EndOutageDateTime.Format(time.TimeOnly), f.ReasonOutage), "\n", "\\n")
 }
