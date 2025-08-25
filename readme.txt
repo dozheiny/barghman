@@ -88,7 +88,7 @@ Each client represents a connection to an electricity service account.
 =============================== TO-DO ===============================
 
 - [x] Make integration with systemd
-- [ ] Add some documentation (man pages)
+- [x] Add some documentation (man pages)
 - [x] `make install,uninstall,clean` commands
 - [ ] Add dockerfile
 - [ ] Add it to AUR and brew

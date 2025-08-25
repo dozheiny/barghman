@@ -1,0 +1,110 @@
+.\" Manpage for Barghman
+.TH barghman 1 "August 2025" "1.0" "Barghman Manual"
+.SH NAME
+barghman \- send blackout schedules as ICS calendar emails
+.SH SYNOPSIS
+.B barghman
+[\-file <config file>]
+.SH DESCRIPTION
+Barghman connects to the electricity provider and sends calendar emails in ICS format
+with your blackout schedules. It can run as a standalone command or as a scheduled
+service using cron jobs.
+.SH INSTALLATION
+.nf
+git clone git@github.com:dozheiny/barghman.git
+cd barghman
+make install
+.fi
+.SH USAGE
+.B barghman -file <config file>
+.TP
+-file <config file>
+Path to your TOML configuration file.
+.SH BUILDING
+1. Install the Golang compiler from https://go.dev.
+2. Compile the binary:
+.nf
+make build
+.fi
+This will produce the barghman binary for your system.
+.SH RUNNING
+1. Create a TOML configuration file (e.g., example.toml).
+2. Update it with your credentials, SMTP details, and client information.
+3. Run Barghman:
+.nf
+barghman -file example.toml
+.fi
+.SH CONFIGURATION
+
+.SS General Options
+.TP
+log_level
+Logger verbosity level (default: 0).
+.TP
+cron_job
+Cron expression for scheduling the service (e.g., @daily, 0 30 2 * * *).
+.TP
+use_cron
+Set to true if you want Barghman to run automatically according to cron_job (default: false).
+
+.SS SMTP Configuration
+.TP
+mail
+The sender email address.
+.TP
+host
+SMTP server host.
+.TP
+port
+SMTP server port.
+.TP
+username
+Username for SMTP authentication.
+.TP
+password
+Password for SMTP authentication.
+.TP
+auth_method
+Authentication method (plain, cram-md5, custom).
+.TP
+identity
+Optional identity for authentication.
+.TP
+skip_tls
+Set to true to skip TLS verification (not recommended for production).
+
+Example:
+.nf
+[smtp.gmail]
+mail = "your-email@gmail.com"
+host = "smtp.gmail.com"
+port = "587"
+username = "your-email@gmail.com"
+password = "your-app-password"
+auth_method = "plain"
+identity = ""
+skip_tls = true
+.fi
+
+.SS Client Configuration
+.TP
+bill_id
+Unique identifier for your electricity bill.
+.TP
+auth_token
+Authentication token provided by https://ios.barghman.com.
+.TP
+recipients
+List of email addresses to send the calendar emails to.
+
+.SS EXAMPLES
+.nf
+# Run Barghman with example config
+barghman -file example.toml
+
+# Run automatically via cron (add to crontab)
+0 30 2 * * * /usr/local/bin/barghman -file /path/to/example.toml
+.fi
+
+.SH AUTHOR
+Dozheiny <dozheiny@gmail.com>

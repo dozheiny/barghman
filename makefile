@@ -4,6 +4,7 @@ CONFIG_PATH=$(HOME)/.config/barghman
 SYSTEMD_PATH=$(HOME)/.config/systemd/user
 CACHE_PATH=$(HOME)/.cache/barghman
 BIN_PATH=$(HOME)/.local/bin
+MAN_PATH=$(HOME)/.local/share/man/man1
 
 .PHONY: build
 build:
@@ -11,14 +12,17 @@ build:
 
 .PHONY: install
 install: build
-
 	mkdir -p $(CONFIG_PATH)
 	mkdir -p $(SYSTEMD_PATH)
 	mkdir -p $(CACHE_PATH)
 	mkdir -p $(BIN_PATH)
+	mkdir -p $(MAN_PATH)
 
 	cp $(BINARY_NAME) $(BIN_PATH)
 	chmod +x $(BIN_PATH)/$(BINARY_NAME)
+
+	cp man/$(BINARY_NAME).1 $(MAN_PATH)/
+	gzip -f $(MAN_PATH)/$(BINARY_NAME).1
 
 	@if [ ! -f $(CONFIG_PATH)/config.toml ]; then \
 		echo "Config file not exists, creating it from example"; \
@@ -43,6 +47,7 @@ uninstall:
 	rm -rf $(CONFIG_PATH)
 	rm -rf $(CACHE_PATH)
 	rm -f $(BINARY_NAME)
+	rm -f $(MAN_PATH)/$(BINARY_NAME).1.gz
 
 .PHONY: clean
 clean:
@@ -53,6 +58,6 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  build     - Build the binary"
-	@echo "  install   - Build and install the service"
-	@echo "  uninstall - Remove the service and binary"
+	@echo "  install   - Build and install the service + man page"
+	@echo "  uninstall - Remove the service, binary, and man page"
 	@echo "  clean     - Remove build artifacts and cache"
