@@ -40,7 +40,6 @@ General Options
 | ----------- | ------- | ---------------------------------------------------------------------------------|
 | `log_level` | `0`     | Logger verbosity level.                                                          |
 | `cron_job`  | `""`    | Cron expression for scheduling the service (e.g., `@daily`, `0 30 2 * * *`).     |
-| `use_cron`  | `false` | Set to `true` if you want Barghman to run automatically according to `cron_job`. |
 
 
 SMTP Configuration
@@ -93,12 +92,9 @@ Each client represents a connection to an electricity service account.
 - [ ] Add dockerfile
 - [ ] Add it to AUR and brew
 - [ ] Update readme with markdown
-- [ ] Maybe support for custom notifications (SMS maybe?)
 - [ ] Add support for multiple bill IDs
 - [ ] Add support for multiple origin emails
 - [ ] Move auth token outside
-- [ ] Make file creator customizable (TOML or JSON)
-- [ ] Move main file to cmd directory
 - [ ] Add delete cache functionality 
 - [ ] Add content to the email about what this email is, why you receive it,
 	 and how to add it to calendars, etc.

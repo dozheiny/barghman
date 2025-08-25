@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	LogLevel int                `toml:"log_level"`
-	CronJob  string             `toml:"cron_job"`
+	LogLevel int    `toml:"log_level"`
+	CronJob  string `toml:"cron_job"`
+	// Deprecated. UseCron is deprecated, if the CronJob field is empty,
+	// This well known run as CronJob.
 	UseCron  bool               `toml:"use_cron"`
 	WaitTime int                `toml:"wait_time"` // based on second.
 	Clients  map[string]Clients `toml:"clients"`
@@ -30,6 +32,7 @@ type SMTP struct {
 
 type Clients struct {
 	BillID     string   `toml:"bill_id"`
+	BillIDs    []string `toml:"bill_ids"`
 	AuthToken  string   `toml:"auth_token"`
 	Recipients []string `toml:"recipients"`
 }

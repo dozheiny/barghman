@@ -1,6 +1,6 @@
 log_level = -8
 cron_job = "@daily"
-use_cron = false
+wait_time = 120
 
 [smtp.gmail]
 mail = ""
@@ -14,5 +14,6 @@ skip_tls = true
 
 [clients.my_client]
 bill_id = ""
+bill_ids = ["", ""]
 auth_token = ""
 recipients = [""]
