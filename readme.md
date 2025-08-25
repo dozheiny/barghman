@@ -1,6 +1,6 @@
 # Barghman
 
-Barghman is a service that connects to the Power electricity provider and sends calendar emails in ICS format with your blackout schedules. It can run as a standalone command or as a scheduled service using cron jobs.
+Barghman is a service that connects to the Iran Power electricity provider and sends calendar emails in ICS format with your blackout schedules. It can run as a standalone command or as a scheduled service using cron jobs.
 
 ## Installation
 
@@ -44,8 +44,9 @@ This will compile the barghman binary for your system.
 
 | Option      | Default | Description                                                                 |
 | ----------- | ------- | --------------------------------------------------------------------------- |
-| `log_level` | `0`     | Logger verbosity level                                                      |
+| `log_level` | `0`     | Logger verbosity level.                                                      |
 | `cron_job`  | `""`    | Cron expression for scheduling the service (e.g., `@daily`, `0 30 2 * * *`). Keep in mind that if cron_job is empty, it will run as a one-time job; otherwise, it will run as a cron job.|
+| `wait_time` | `0` | The wait time specifies how many seconds to wait for each client or bill ID. This is necessary because the Barghman API imposes limits on its planned blackout endpoint.|  
 
 ### SMTP Configuration
 
@@ -53,14 +54,14 @@ Each mail provider can be configured under `[smtp.<provider>]`.
 
 | Option        | Description                                                             |
 | ------------- | ----------------------------------------------------------------------- |
-| `mail`        | The sender email address                                                |
-| `host`        | SMTP server host                                                        |
-| `port`        | SMTP server port                                                        |
-| `username`    | Username for SMTP authentication                                        |
-| `password`    | Password for SMTP authentication                                        |
-| `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`)                   |
-| `identity`    | Optional identity for authentication                                    |
-| `skip_tls`    | Set to `true` to skip TLS verification (not recommended for production) |
+| `mail`        | The sender email address.                                                |
+| `host`        | SMTP server host.                                                        |
+| `port`        | SMTP server port.                                                        |
+| `username`    | Username for SMTP authentication.                                        |
+| `password`    | Password for SMTP authentication.                                        |
+| `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`).                   |
+| `identity`    | Optional identity for authentication.                                    |
+| `skip_tls`    | Set to `true` to skip TLS verification. |
 
 **Example:**
 
@@ -83,7 +84,8 @@ Each client represents a connection to an electricity service account.
 | Option       | Description                                               |
 | ------------ | --------------------------------------------------------- |
 | `bill_id`    | Unique identifier for your electricity bill               |
-| `auth_token` | Authentication token provided by https://ios.barghman.com |
+| `bill_ids` | Unique identifiers for your electricity bills, This option added to avoid breaking changes here.|
+| `auth_token` | Authentication token provided by https://uiapi.saapa.ir |
 | `recipients` | List of email addresses to send the calendar emails to    |
 
 ## TO-DO
