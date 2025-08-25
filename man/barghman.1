@@ -22,6 +22,12 @@ barghman -file <config file>
 .TP
 .B -file <config file>
 Path to your TOML configuration file.
+If you wish for running as systemd service
+.nf
+systemctl --user daemon-reload
+systemctl --user enable barghman.service
+.fi
+
 .SH BUILDING
 1. Install the Go compiler from https://go.dev
 2. Run the build command:

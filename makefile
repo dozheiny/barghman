@@ -36,8 +36,8 @@ install: build
 	     -e "s|{{CACHE_PATH}}|$(CACHE_PATH)|g" \
 	     systemd/$(BINARY_NAME).service.template > $(SYSTEMD_PATH)/$(BINARY_NAME).service
 
-	systemctl --user daemon-reload
-	systemctl --user enable $(BINARY_NAME).service
+	@echo "barghman sucessfully installed on your computer!"
+	@echo "update your configuration on ${CONFIG_PATH}"
 
 .PHONY: uninstall
 uninstall:
