@@ -93,6 +93,9 @@ skip_tls = true
 .SS Client Configuration
 Each client represents a connection to an electricity service account.
 .TP
+smtp
+smtp is used to identify each SMTP configuration, allowing you to map specific SMTP configs to your clients. For example if your smtp config starts with [smtp.gmail] then the value of smtp_name should be gmail.
+.TP
 bill_id
 Unique identifier for your electricity bill.
 .TP
@@ -108,11 +111,6 @@ List of email addresses to send the calendar emails to.
 Run Barghman with example config:
 .nf
 barghman -file example.toml
-.fi
-
-Schedule via cron (add to crontab):
-.nf
-0 30 2 * * * ~/.local/bin/barghman -file ~/.config/barghman/config.toml
 .fi
 
 .SH AUTHOR

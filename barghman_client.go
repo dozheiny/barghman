@@ -55,7 +55,7 @@ type Data struct {
 }
 
 func PlannedBlackOut(ctx context.Context, authToken, billID string, startDate, endDate time.Time) ([]Data, error) {
-	slog.Debug("going to call blackout", "from time", startDate.String(), "to time", endDate.String())
+	slog.Debug("going to call blackout", "from time", startDate.String(), "to time", endDate.String(), "bill id", billID)
 
 	payload := PlannedBlackoutRequest{
 		BillID:   billID,

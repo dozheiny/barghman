@@ -13,6 +13,7 @@ identity = ""
 skip_tls = true
 
 [clients.my_client]
+smtp_name = "gmail"
 bill_id = ""
 bill_ids = ["", ""]
 auth_token = ""

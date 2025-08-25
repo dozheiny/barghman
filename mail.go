@@ -58,7 +58,7 @@ type Mail struct {
 	Loc    *time.Location
 }
 
-func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
+func NewMailClient(config SMTP, loc *time.Location) Mail {
 	var auth smtp.Auth
 	switch config.AuthMethod {
 	case smtpAuthMethodMD5:
@@ -70,14 +70,12 @@ func NewMailClient(config SMTP, loc *time.Location) (*Mail, error) {
 	case smtpAuthMethodCustom:
 		auth = LoginAuth(config.Username, config.Password)
 
-	default:
-		return nil, fmt.Errorf("invalid auth method")
 	}
 
-	return &Mail{Auth: auth, Config: config, Loc: loc}, nil
+	return Mail{Auth: auth, Config: config, Loc: loc}
 }
 
-func (m *Mail) Do(fc *FileContent, subject string) error {
+func (m Mail) Do(fc *FileContent, subject string) error {
 	boundary := generateBoundary()
 
 	var content strings.Builder

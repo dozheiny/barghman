@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"slices"
 	_ "time/tzdata"
 
 	"github.com/BurntSushi/toml"
@@ -31,6 +33,7 @@ type SMTP struct {
 }
 
 type Clients struct {
+	Smtp       string   `toml:"smtp"`
 	BillID     string   `toml:"bill_id"`
 	BillIDs    []string `toml:"bill_ids"`
 	AuthToken  string   `toml:"auth_token"`
@@ -45,6 +48,8 @@ const (
 	smtpAuthMethodCustom smtpAuthMethod = "custom"
 )
 
+var smtpAuthMethodValues = []smtpAuthMethod{smtpAuthMethodPlain, smtpAuthMethodMD5, smtpAuthMethodCustom}
+
 func ParseConfig() (*Config, error) {
 	var configFilePath string
 	flag.StringVar(&configFilePath, "file", "config.toml", "config file(toml formatted)")
@@ -53,6 +58,12 @@ func ParseConfig() (*Config, error) {
 	config := new(Config)
 	if _, err := toml.DecodeFile(configFilePath, config); err != nil {
 		return nil, err
+	}
+
+	for _, smtp := range config.SMTP {
+		if !slices.Contains(smtpAuthMethodValues, smtp.AuthMethod) {
+			return nil, fmt.Errorf("invalid smtp auth, should be exactly one of %v", smtpAuthMethodValues)
+		}
 	}
 
 	return config, nil

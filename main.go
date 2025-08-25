@@ -48,25 +48,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	var smtp SMTP
-	for _, s := range config.SMTP {
-		smtp = s
-	}
-
-	mail, err := NewMailClient(smtp, location)
-	if err != nil {
-		slog.Error("Unable to create new mail client", "error", err)
-		os.Exit(1)
-	}
-
 	job := func() {
 		slog.Debug("job started")
 
 		for subject, c := range config.Clients {
+
+			smtp, ok := config.SMTP[c.Smtp]
+			if !ok {
+				slog.Error("Cannot map between smtp config and client config", "smtp name", c.Smtp)
+				continue
+			}
+
+			mail := NewMailClient(smtp, location)
+
 			for _, billID := range append(c.BillIDs, c.BillID) {
 				data, err := PlannedBlackOut(context.Background(), c.AuthToken, billID, time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, 5))
 				if err != nil {
-					slog.Error("plannedBlackOut failed", "error", err)
+					slog.Error("PlannedBlackOut failed", "error", err)
 					continue
 				}
 
