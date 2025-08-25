@@ -4,6 +4,8 @@ Barghman is a service that connects to the Iran Power electricity provider and s
 
 ## Installation
 
+[AUR](https://aur.archlinux.org/packages/barghman-git)
+
 ```bash
 git clone git@github.com:dozheiny/barghman.git
 cd barghman
