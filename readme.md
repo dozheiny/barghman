@@ -2,6 +2,8 @@
 
 Barghman is a service that connects to the Iran Power electricity provider and sends calendar emails in ICS format with your blackout schedules. It can run as a standalone command or as a scheduled service using cron jobs.
 
+*Hope for the days when we don't need this fucking service for power outages.*
+
 ## Installation
 
 [AUR](https://aur.archlinux.org/packages/barghman-git)
