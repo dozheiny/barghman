@@ -4,6 +4,7 @@
         "datelayout",
         "ebills",
         "godotenv",
+        "goreleaser",
         "Organaizer",
         "PRODID",
         "ptime",

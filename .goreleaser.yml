@@ -1,0 +1,55 @@
+project_name: barghman
+
+builds:
+  - id: barghman
+    main: .
+    binary: barghman
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: archive
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - readme.md
+      - example.toml
+      - man/barghman.1
+      - systemd/barghman.service.template
+
+nfpms:
+  - id: deb-rpm
+    package_name: barghman
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}"
+    maintainer: "Iliya Aghamajidi <dozheiny@gmail.com>"
+    description: "Barghman service - manage power outage scheduling and monitoring"
+    license: "MIT"
+    vendor: "Barghman"
+    homepage: "https://github.com/dozheiny/barghman"
+    formats:
+      - deb
+      - rpm
+    dependencies:
+      - systemd
+    bindir: /usr/bin
+    contents:
+      - src: example.toml
+        dst: /etc/barghman/config.toml
+      - src: systemd/barghman.service.template
+        dst: /lib/systemd/system/barghman.service
+      - src: man/barghman.1
+        dst: /usr/share/man/man1/barghman.1
+
+release:
+  github:
+    owner: dozheiny
+    name: barghman

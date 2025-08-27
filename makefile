@@ -54,10 +54,15 @@ clean:
 	rm -f $(BINARY_NAME)
 	rm -rf $(CACHE_PATH)
 
+.PHONY: releaser
+releaser:
+	goreleaser release --snapshot --clean
+
 .PHONY: help
 help:
 	@echo "Available targets:"
 	@echo "  build     - Build the binary"
 	@echo "  install   - Build and install the service"
 	@echo "  uninstall - Remove the service, binary"
+	@echo "	 releaser  - Generate release files"
 	@echo "  clean     - Remove build artifacts and cache"
