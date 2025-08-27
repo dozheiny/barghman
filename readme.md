@@ -108,6 +108,7 @@ Each client represents a connection to an electricity service account.
 - [x] Add support for multiple bill IDs
 - [x] Add support for multiple origin emails
 - [x] Add delete cache functionality
+- [ ] Add update mail functionality
 - [ ] Add Dockerfile
 - [ ] Add content to the email about what this email is, why you receive it, and how to add it to calendars, etc.
 - [ ] Add install.bash script (not only Makefile, no required installed Go)
