@@ -1,5 +1,9 @@
 project_name: barghman
 
+changelog:
+  use: git 
+  sort: asc
+
 builds:
   - id: barghman
     main: .
@@ -53,3 +57,4 @@ release:
   github:
     owner: dozheiny
     name: barghman
+
