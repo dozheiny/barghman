@@ -104,10 +104,10 @@ Each client represents a connection to an electricity service account.
 - [x] Add some documentation (man pages)
 - [x] `make install`, `uninstall`, `clean` commands
 - [ ] Add Dockerfile
-- [ ] Add it to AUR and brew
+- [x] Add it to AUR
 - [x] Update README with Markdown
 - [x] Add support for multiple bill IDs
 - [x] Add support for multiple origin emails
-- [ ] Add delete cache functionality
+- [x] Add delete cache functionality
 - [ ] Add content to the email about what this email is, why you receive it, and how to add it to calendars, etc.
 - [ ] Add install.bash script (not only Makefile, no required installed Go)

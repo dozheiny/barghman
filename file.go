@@ -51,7 +51,7 @@ func (f *FileContent) Write(file *os.File) error {
 	return nil
 }
 
-func LoadOrCreateFile(billID string, outageNumber int, date time.Time) (*os.File, error) {
+func LoadOrCreateFile(cachePathDir, billID string, outageNumber int, date time.Time) (*os.File, error) {
 	filePath := cachePathDir + FileName(billID, outageNumber, date)
 
 	slog.Debug("file path to open or create", "file path", filePath)
@@ -65,4 +65,23 @@ func (f *FileContent) Summary() string {
 func (f *FileContent) Description() string {
 	return strings.ReplaceAll(fmt.Sprintf("Blackout!\nAddress: %s\nDate: %s\nFrom %s until %s\nReason: %s",
 		f.Address, ptime.New(f.StartOutageDateTime).Format("yyyy/MM/dd"), f.StartOutageDateTime.Format(time.TimeOnly), f.EndOutageDateTime.Format(time.TimeOnly), f.ReasonOutage), "\n", "\\n")
+}
+
+func CreateCachePath() (string, error) {
+	cachePath, err := os.UserCacheDir()
+	if err != nil {
+		slog.Error("unable to get user cache path directory", "error", err)
+		return "", err
+	}
+
+	cachePathDir := cachePath + "/" + appName + "/"
+
+	if err := os.MkdirAll(cachePathDir, 0o755); err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			slog.Error("cannot create directory under the cache path", "error", err, "cache path directory", cachePathDir)
+			return "", err
+		}
+	}
+
+	return cachePathDir, nil
 }

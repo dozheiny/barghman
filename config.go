@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"slices"
-	_ "time/tzdata"
+	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -14,10 +14,13 @@ type Config struct {
 	CronJob  string `toml:"cron_job"`
 	// Deprecated. UseCron is deprecated, if the CronJob field is empty,
 	// This well known run as CronJob.
-	UseCron  bool               `toml:"use_cron"`
-	WaitTime int                `toml:"wait_time"` // based on second.
-	Clients  map[string]Clients `toml:"clients"`
-	SMTP     map[string]SMTP    `toml:"smtp"`
+	UseCron bool `toml:"use_cron"`
+	// WaitTime is based on second.
+	WaitTime int `toml:"wait_time"`
+	// DeleteDurationPeriod will be use for delete cache automatically.
+	DeleteDurationPeriod time.Duration      `toml:"delete_duration_period"`
+	Clients              map[string]Clients `toml:"clients"`
+	SMTP                 map[string]SMTP    `toml:"smtp"`
 }
 
 type SMTP struct {
@@ -33,7 +36,7 @@ type SMTP struct {
 }
 
 type Clients struct {
-	Smtp       string   `toml:"smtp"`
+	SMTP       string   `toml:"smtp"`
 	BillID     string   `toml:"bill_id"`
 	BillIDs    []string `toml:"bill_ids"`
 	AuthToken  string   `toml:"auth_token"`
@@ -64,6 +67,10 @@ func ParseConfig() (*Config, error) {
 		if !slices.Contains(smtpAuthMethodValues, smtp.AuthMethod) {
 			return nil, fmt.Errorf("invalid smtp auth, should be exactly one of %v", smtpAuthMethodValues)
 		}
+	}
+
+	if config.DeleteDurationPeriod == 0 {
+		config.DeleteDurationPeriod = time.Hour * 24 * 7
 	}
 
 	return config, nil
