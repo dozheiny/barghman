@@ -12,6 +12,14 @@ auth_method = "plain"
 identity = ""
 skip_tls = true
 
+# Optional: route SMTP through a SOCKS5 proxy.
+# Remove or leave host empty to connect directly.
+# [smtp.gmail.proxy]
+# host = "127.0.0.1"
+# port = "1080"
+# username = ""   # leave empty if proxy requires no auth
+# password = ""
+
 [clients.my_client]
 smtp_name = "gmail"
 bill_id = ""

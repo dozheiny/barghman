@@ -54,7 +54,7 @@ func MailerFunc(cachePathDir string, config Config, location *time.Location) fun
 			mail := NewMailClient(smtp, location)
 
 			for _, billID := range append(c.BillIDs, c.BillID) {
-				data, err := PlannedBlackOut(context.Background(), c.AuthToken, billID, time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, 5))
+				data, err := PlannedBlackOut(context.Background(), config.AuthToken, billID, time.Now().AddDate(0, 0, -1), time.Now().AddDate(0, 0, 5))
 				if err != nil {
 					slog.Error("PlannedBlackOut failed", "error", err)
 					continue

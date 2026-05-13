@@ -9,6 +9,8 @@ import (
 	"net/smtp"
 	"strings"
 	"time"
+
+	"golang.org/x/net/proxy"
 )
 
 var (
@@ -25,12 +27,12 @@ var (
 		"Content-Disposition: inline; filename=\"invite.ics\"\r\n\r\n" +
 		"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Blu//Barghman Calendar//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:REQUEST\r\n"
 
-		/*
-			textContent = "--%s\r\n" + // boundary
-				"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
-				"Content-Transfer-Encoding: 7bit\r\n\r\n" +
-				"This is a test email for barghman service\r\n\r\n"
-		*/
+	textContent = "--%s\r\n" + // boundary
+		"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
+		"Content-Transfer-Encoding: 7bit\r\n\r\n" +
+		"Greetings\r\nYou are receiving this email due to expected recurring power outages in the coming days.\r\n" +
+		"You can click on the attached calendar.ics file to add the possible outage schedule to your calendar.\r\n" +
+		"We hope that in the near future, you wont have to receive emails like this.\r\n\r\n"
 
 	CalendarFooterContent = "STATUS:CONFIRMED\r\nTRANSP:OPAQUE\r\nPRIORITY:5\r\nEND:VEVENT\r\n\r\n"
 
@@ -92,12 +94,10 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 		return err
 	}
 
-	/*
-		if _, err := content.WriteString(fmt.Sprintf(textContent, boundary)); err != nil {
-			slog.Error("Failed to write text content", "error", err)
-			return err
-		}
-	*/
+	if _, err := content.WriteString(fmt.Sprintf(textContent, boundary)); err != nil {
+		slog.Error("Failed to write text content", "error", err)
+		return err
+	}
 
 	if _, err := content.WriteString(fmt.Sprintf(CalendarHeaderContent, boundary)); err != nil {
 		slog.Error("Failed to write calendar header content", "error", err)
@@ -142,7 +142,7 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 }
 
 func (m Mail) Send(msg string, recipients []string) error {
-	conn, err := net.Dial("tcp", net.JoinHostPort(m.Config.Address, m.Config.Port))
+	conn, err := m.dial()
 	if err != nil {
 		slog.Error("can't dial the server", "error", err, "address", m.Config.Address)
 		return err
@@ -189,8 +189,37 @@ func (m Mail) Send(msg string, recipients []string) error {
 		return err
 	}
 
-	slog.Error("client quit error failed", "error", client.Quit())
+	if err := client.Quit(); err != nil {
+		slog.Warn("client quit returned non-nil", "error", err)
+	}
 	return nil
+}
+
+// dial opens a TCP connection to the SMTP server, routing through a SOCKS5
+// proxy when one is configured in the SMTP config.
+func (m Mail) dial() (net.Conn, error) {
+	smtpAddr := net.JoinHostPort(m.Config.Address, m.Config.Port)
+
+	if !m.Config.Proxy.Enabled() {
+		return net.Dial("tcp", smtpAddr)
+	}
+
+	p := m.Config.Proxy
+	proxyAddr := net.JoinHostPort(p.Host, p.Port)
+
+	var auth proxy.Auth
+	if p.Username != "" {
+		auth = proxy.Auth{User: p.Username, Password: p.Password}
+	}
+
+	slog.Debug("dialing SMTP via SOCKS5 proxy", "proxy", proxyAddr, "smtp", smtpAddr)
+
+	dialer, err := proxy.SOCKS5("tcp", proxyAddr, &auth, proxy.Direct)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create SOCKS5 dialer: %w", err)
+	}
+
+	return dialer.Dial("tcp", smtpAddr)
 }
 
 type loginAuth struct {

@@ -7,6 +7,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yaa110/go-persian-calendar v1.2.2
+	golang.org/x/net v0.40.0
 )
 
 require (

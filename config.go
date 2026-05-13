@@ -21,6 +21,21 @@ type Config struct {
 	DeleteDurationPeriod time.Duration      `toml:"delete_duration_period"`
 	Clients              map[string]Clients `toml:"clients"`
 	SMTP                 map[string]SMTP    `toml:"smtp"`
+
+	AuthToken string `toml:"auth_token"`
+}
+
+// Proxy holds optional SOCKS5 proxy configuration for outbound SMTP connections.
+type Proxy struct {
+	Host     string `toml:"host"`
+	Port     string `toml:"port"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
+}
+
+// Enabled returns true when a proxy host is configured.
+func (p *Proxy) Enabled() bool {
+	return p != nil && p.Host != ""
 }
 
 type SMTP struct {
@@ -33,13 +48,13 @@ type SMTP struct {
 	AuthMethod smtpAuthMethod `toml:"auth_method"`
 	Identity   string         `toml:"identity"`
 	SkipTLS    bool           `toml:"skip_tls"`
+	Proxy      *Proxy         `toml:"proxy"`
 }
 
 type Clients struct {
 	SMTP       string   `toml:"smtp"`
 	BillID     string   `toml:"bill_id"`
 	BillIDs    []string `toml:"bill_ids"`
-	AuthToken  string   `toml:"auth_token"`
 	Recipients []string `toml:"recipients"`
 }
 

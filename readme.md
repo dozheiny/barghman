@@ -6,10 +6,37 @@ Barghman is a service that connects to the Iran Power electricity provider and s
 
 ## Installation
 
-[AUR](https://aur.archlinux.org/packages/barghman-git)
+### One-line installer (Linux / macOS / Windows MSYS2)
 
 ```bash
-git clone git@github.com:dozheiny/barghman.git
+curl -fsSL https://github.com/dozheiny/barghman/releases/latest/download/install.sh | bash
+```
+
+Or with `wget`:
+
+```bash
+wget -qO- https://github.com/dozheiny/barghman/releases/latest/download/install.sh | bash
+```
+
+The script auto-detects your OS and architecture (`linux/darwin/windows`, `amd64/arm64`), downloads the correct release archive, and installs the binary to `/usr/local/bin` (or `%USERPROFILE%\bin` on Windows).
+
+### AUR (Arch Linux)
+
+```bash
+yay -S barghman-git
+```
+
+Or manually:
+
+```bash
+git clone https://aur.archlinux.org/barghman-git.git
+cd barghman-git && makepkg -si
+```
+
+### From source
+
+```bash
+git clone https://github.com/dozheiny/barghman.git
 cd barghman
 make install
 ```
@@ -74,6 +101,17 @@ Each mail provider can be configured under `[smtp.<provider>]`.
 | `identity`    | Optional identity for authentication.                                    |
 | `skip_tls`    | Set to `true` to skip TLS verification. |
 
+#### Proxy (optional)
+
+To route SMTP traffic through a SOCKS5 proxy, add a `[smtp.<provider>.proxy]` sub-table:
+
+| Option     | Description                                          |
+| ---------- | ---------------------------------------------------- |
+| `host`     | SOCKS5 proxy host.                                   |
+| `port`     | SOCKS5 proxy port.                                   |
+| `username` | Proxy username (leave empty if auth not required).   |
+| `password` | Proxy password (leave empty if auth not required).   |
+
 **Example:**
 
 ```toml
@@ -86,6 +124,12 @@ password = "your-app-password"
 auth_method = "plain"
 identity = ""
 skip_tls = true
+
+[smtp.gmail.proxy]
+host = "127.0.0.1"
+port = "1080"
+username = ""   # omit if proxy needs no auth
+password = ""
 ```
 
 ### Client Configuration
@@ -113,4 +157,4 @@ Each client represents a connection to an electricity service account.
 - [ ] Add update mail functionality
 - [ ] Add Dockerfile
 - [ ] Add content to the email about what this email is, why you receive it, and how to add it to calendars, etc.
-- [ ] Add install.bash script (not only Makefile, no required installed Go)
+- [x] Add install.bash script (not only Makefile, no required installed Go)
