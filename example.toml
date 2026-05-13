@@ -1,6 +1,8 @@
 log_level = -8
 cron_job = "@daily"
 wait_time = 120
+auth_token = ""
+
 
 [smtp.gmail]
 mail = ""
@@ -24,5 +26,4 @@ skip_tls = true
 smtp_name = "gmail"
 bill_id = ""
 bill_ids = ["", ""]
-auth_token = ""
 recipients = [""]
