@@ -53,8 +53,10 @@ nfpms:
       - src: man/barghman.1
         dst: /usr/share/man/man1/barghman.1
 
+extra_files:
+  - glob: install.sh
+
 release:
   github:
     owner: dozheiny
     name: barghman
-

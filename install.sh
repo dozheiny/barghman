@@ -42,13 +42,15 @@ VERSION=$(${FETCH} "${LATEST_URL}" | grep '"tag_name"' | sed -E 's/.*"tag_name":
 info "Latest version: ${VERSION}"
 
 # ── build download URL ────────────────────────────────────────────────────────
+# GoReleaser default archive name: barghman_v2.0.0_linux_amd64.tar.gz
+# .Version includes the "v" prefix; .Os is lowercase; .Arch is lowercase.
 BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
 
 if [ "${OS}" = "windows" ]; then
-  ARCHIVE="${BINARY}_${VERSION#v}_${OS}_${ARCH}.zip"
+  ARCHIVE="${BINARY}_${VERSION}_${OS}_${ARCH}.zip"
   EXT="zip"
 else
-  ARCHIVE="${BINARY}_${VERSION#v}_${OS}_${ARCH}.tar.gz"
+  ARCHIVE="${BINARY}_${VERSION}_${OS}_${ARCH}.tar.gz"
   EXT="tar.gz"
 fi
 
