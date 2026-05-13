@@ -83,6 +83,7 @@ This will compile the barghman binary for your system.
 | Option      | Default | Description                                                                 |
 | ----------- | ------- | --------------------------------------------------------------------------- |
 | `log_level` | `0`     | Logger verbosity level.                                                      |
+| `auth_token` | Authentication token provided by https://uiapi.saapa.ir |
 | `cron_job`  | `""`    | Cron expression for scheduling the service (e.g., `@daily`, `0 30 2 * * *`). Keep in mind that if cron_job is empty, it will run as a one-time job; otherwise, it will run as a cron job.|
 | `wait_time` | `0` | The wait time specifies how many seconds to wait for each client or bill ID. This is necessary because the Barghman API imposes limits on its planned blackout endpoint.|  
 
@@ -141,7 +142,6 @@ Each client represents a connection to an electricity service account.
 | `smtp` | smtp is used to identify each SMTP configuration, allowing you to map specific SMTP configs to your clients. For example if your smtp config starts with `[smtp.gmail]` then the value of smtp_name should be gmail.|
 | `bill_id`    | Unique identifier for your electricity bill.               |
 | `bill_ids` | Unique identifiers for your electricity bills, This option added to avoid breaking changes here.|
-| `auth_token` | Authentication token provided by https://uiapi.saapa.ir |
 | `recipients` | List of email addresses to send the calendar emails to.    |
 
 ## TO-DO
