@@ -22,6 +22,18 @@ skip_tls = true
 # username = ""   # leave empty if proxy requires no auth
 # password = ""
 
+# Optional: for on-prem Exchange accounts, mail can be delivered over
+# Exchange Web Services (HTTPS/443) instead of raw SMTP (port 25). Useful
+# when the SMTP port is blocked/throttled but EWS/OWA is reachable.
+# [smtp.exchange]
+# mail = ""
+# host = "mail.example.com"       # used to build https://<host>/EWS/Exchange.asmx
+# username = "DOMAIN\\user"       # NTLM credentials
+# password = ""
+# transport = "ews"
+# skip_tls = false
+# ews_url = ""                    # optional override of the default EWS endpoint
+
 [clients.my_client]
 smtp_name = "gmail"
 bill_id = ""

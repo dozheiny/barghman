@@ -101,10 +101,14 @@ Each mail provider can be configured under `[smtp.<provider>]`.
 | `auth_method` | Authentication method (`plain`, `cram-md5`, `custom`).                   |
 | `identity`    | Optional identity for authentication.                                    |
 | `skip_tls`    | Set to `true` to skip TLS verification. |
+| `transport`   | `smtp` (default) sends directly over SMTP. `ews` sends the same message through Exchange Web Services over HTTPS instead - useful when SMTP is blocked/throttled but EWS/OWA is reachable. |
+| `ews_url`     | Only used when `transport = "ews"`. Overrides the default EWS endpoint (`https://<host>/EWS/Exchange.asmx`). |
+
+When `transport = "ews"`, `username`/`password` are used for NTLM authentication against EWS (e.g. `DOMAIN\user`), and `auth_method` is ignored.
 
 #### Proxy (optional)
 
-To route SMTP traffic through a SOCKS5 proxy, add a `[smtp.<provider>.proxy]` sub-table:
+To route SMTP (or EWS) traffic through a SOCKS5 proxy, add a `[smtp.<provider>.proxy]` sub-table:
 
 | Option     | Description                                          |
 | ---------- | ---------------------------------------------------- |

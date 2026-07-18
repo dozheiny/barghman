@@ -3,6 +3,7 @@ module github.com/dozheiny/barghman
 go 1.24.5
 
 require (
+	github.com/Azure/go-ntlmssp v0.1.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.10.0

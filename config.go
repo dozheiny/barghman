@@ -49,6 +49,16 @@ type SMTP struct {
 	Identity   string         `toml:"identity"`
 	SkipTLS    bool           `toml:"skip_tls"`
 	Proxy      *Proxy         `toml:"proxy"`
+
+	// Transport selects how the mail built for this account is delivered.
+	// "smtp" (the default) dials the mail server directly on Address:Port.
+	// "ews" posts the same MIME message to Exchange Web Services over
+	// HTTPS instead, which is useful when SMTP is blocked or throttled but
+	// EWS/OWA on 443 is reachable.
+	Transport mailTransport `toml:"transport"`
+	// EWSURL is the Exchange Web Services endpoint used when Transport is
+	// "ews". If empty, it defaults to "https://<host>/EWS/Exchange.asmx".
+	EWSURL string `toml:"ews_url"`
 }
 
 type Clients struct {
@@ -68,6 +78,15 @@ const (
 
 var smtpAuthMethodValues = []smtpAuthMethod{smtpAuthMethodPlain, smtpAuthMethodMD5, smtpAuthMethodCustom}
 
+type mailTransport string
+
+const (
+	mailTransportSMTP mailTransport = "smtp"
+	mailTransportEWS  mailTransport = "ews"
+)
+
+var mailTransportValues = []mailTransport{mailTransportSMTP, mailTransportEWS}
+
 func ParseConfig() (*Config, error) {
 	var configFilePath string
 	flag.StringVar(&configFilePath, "file", "config.toml", "config file(toml formatted)")
@@ -78,9 +97,25 @@ func ParseConfig() (*Config, error) {
 		return nil, err
 	}
 
-	for _, smtp := range config.SMTP {
-		if !slices.Contains(smtpAuthMethodValues, smtp.AuthMethod) {
-			return nil, fmt.Errorf("invalid smtp auth, should be exactly one of %v", smtpAuthMethodValues)
+	for name, smtp := range config.SMTP {
+		if smtp.Transport == "" {
+			smtp.Transport = mailTransportSMTP
+			config.SMTP[name] = smtp
+		}
+
+		if !slices.Contains(mailTransportValues, smtp.Transport) {
+			return nil, fmt.Errorf("smtp %q: invalid transport, should be exactly one of %v", name, mailTransportValues)
+		}
+
+		switch smtp.Transport {
+		case mailTransportSMTP:
+			if !slices.Contains(smtpAuthMethodValues, smtp.AuthMethod) {
+				return nil, fmt.Errorf("smtp %q: invalid smtp auth, should be exactly one of %v", name, smtpAuthMethodValues)
+			}
+		case mailTransportEWS:
+			if smtp.Username == "" || smtp.Password == "" {
+				return nil, fmt.Errorf("smtp %q: username and password are required for ews transport", name)
+			}
 		}
 	}
 

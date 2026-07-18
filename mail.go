@@ -22,9 +22,9 @@ var (
 		"Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\n" // Boundary.
 
 	CalendarHeaderContent = "--%s\r\n" +
-		"Content-Type: text/calendar; method=REQUEST; charset=\"UTF-8\"\r\n" +
+		"Content-Type: text/calendar; method=REQUEST; charset=\"UTF-8\"; name=\"calendar.ics\"\r\n" +
 		"Content-Transfer-Encoding: 7bit\r\n" +
-		"Content-Disposition: inline; filename=\"invite.ics\"\r\n\r\n" +
+		"Content-Disposition: attachment; filename=\"calendar.ics\"\r\n\r\n" +
 		"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Blu//Barghman Calendar//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:REQUEST\r\n"
 
 	textContent = "--%s\r\n" + // boundary
@@ -142,17 +142,26 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 }
 
 func (m Mail) Send(msg string, recipients []string) error {
+	if m.Config.Transport == mailTransportEWS {
+		return m.sendEWS(msg)
+	}
+	return m.sendSMTP(msg, recipients)
+}
+
+func (m Mail) sendSMTP(msg string, recipients []string) error {
 	conn, err := m.dial()
 	if err != nil {
 		slog.Error("can't dial the server", "error", err, "address", m.Config.Address)
 		return err
 	}
+	defer conn.Close()
 
 	client, err := smtp.NewClient(conn, m.Config.Address)
 	if err != nil {
 		slog.Error("smtp new client failed", "error", err, "address", m.Config.Address)
 		return err
 	}
+	defer client.Close()
 
 	if err := client.StartTLS(&tls.Config{ServerName: m.Config.Address, InsecureSkipVerify: m.Config.SkipTLS}); err != nil {
 		slog.Error("can't start TLS", "error", err)
