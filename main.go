@@ -13,14 +13,14 @@ import (
 const appName = "barghman"
 
 func main() {
-	config, err := ParseConfig()
+	config, configPath, err := ParseConfig()
 	if err != nil {
 		slog.Error("Failed to parse config", "error", err)
 		os.Exit(1)
 	}
 
 	slog.SetLogLoggerLevel(slog.Level(config.LogLevel))
-	slog.Debug("config file loaded", "config", config)
+	slog.Debug("config file loaded", "config", config, "path", configPath)
 
 	location, err := time.LoadLocation("Asia/Tehran")
 	if err != nil {
@@ -34,7 +34,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	jobFunc := MailerFunc(cachePathDir, *config, location)
+	jobFunc := MailerFunc(cachePathDir, configPath, location)
 	deleteFunc := DeleteCacheFunc(cachePathDir, config.DeleteDurationPeriod)
 
 	if len(config.CronJob) == 0 {

@@ -12,7 +12,11 @@ a cron schedule.
 Key files:
 - `main.go` - entrypoint, cron wiring.
 - `config.go` - TOML config parsing/validation (`Config`, `SMTP`, `Clients`).
-- `func.go` - the mailer job (`MailerFunc`) and cache-cleanup job.
+- `func.go` - the mailer job (`MailerFunc`) and cache-cleanup job. Reloads
+  the config path each run so recipient (and other) edits apply without
+  restart; sends only to new recipients for unchanged outages, and update
+  mails when same-day outage times change.
+- `outage_send.go` - decide skip / new / update / new-recipients send.
 - `mail.go` - builds the MIME email (text + `calendar.ics` invite) and sends
   it. Dispatches to either `sendSMTP` (direct SMTP) or `sendEWS`.
 - `ews.go` - alternative transport that posts the same MIME message to
@@ -30,6 +34,7 @@ go vet ./...               # static checks
 go test ./...               # unit tests
 make build                  # build binary as ./barghman
 make releaser                # local goreleaser snapshot build
+make docker                  # build Docker image barghman:latest
 ```
 
 Run locally against a config file:

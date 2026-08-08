@@ -76,6 +76,26 @@ This will compile the barghman binary for your system.
    barghman -file example.toml
    ```
 
+## Docker
+
+Build the image:
+
+```bash
+make docker
+# or: docker build -t barghman:latest .
+```
+
+Run with a mounted config (and optional cache volume so sent-outage state survives restarts):
+
+```bash
+docker run --rm \
+  -v /path/to/config.toml:/etc/barghman/config.toml:ro \
+  -v barghman-cache:/var/cache/barghman \
+  barghman:latest
+```
+
+The image entrypoint is `barghman -file /etc/barghman/config.toml`. Use a non-empty `cron_job` in the config so the container keeps running on a schedule.
+
 ## Config File Format
 
 ### General Options
@@ -143,22 +163,8 @@ Each client represents a connection to an electricity service account.
 
 | Option       | Description                                               |
 | ------------ | --------------------------------------------------------- |
-| `smtp` | smtp is used to identify each SMTP configuration, allowing you to map specific SMTP configs to your clients. For example if your smtp config starts with `[smtp.gmail]` then the value of smtp_name should be gmail.|
+| `smtp` | Name of the `[smtp.<name>]` table to use for this client (e.g. `gmail` for `[smtp.gmail]`). |
 | `bill_id`    | Unique identifier for your electricity bill.               |
 | `bill_ids` | Unique identifiers for your electricity bills, This option added to avoid breaking changes here.|
-| `recipients` | List of email addresses to send the calendar emails to.    |
+| `recipients` | List of email addresses to send the calendar emails to. When running on a cron schedule, the config file is reloaded each cycle: newly added recipients get invites for already-known outages (only them), and same-day outage time changes trigger an update email to all current recipients. |
 
-## TO-DO
-
-- [x] Make integration with systemd
-- [x] Add some documentation (man pages)
-- [x] `make install`, `uninstall`, `clean` commands
-- [x] Add it to AUR
-- [x] Update README with Markdown
-- [x] Add support for multiple bill IDs
-- [x] Add support for multiple origin emails
-- [x] Add delete cache functionality
-- [ ] Add update mail functionality
-- [ ] Add Dockerfile
-- [ ] Add content to the email about what this email is, why you receive it, and how to add it to calendars, etc.
-- [x] Add install.bash script (not only Makefile, no required installed Go)

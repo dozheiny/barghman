@@ -1,11 +1,25 @@
+# Logger verbosity (slog level). -8 is debug; 0 is info.
 log_level = -8
+
+# Cron expression for scheduled runs (e.g. "@daily", "0 30 2 * * *").
+# Empty string = run once and exit. On each cron tick the config file is
+# reloaded, so recipient/bill/SMTP edits apply without restarting.
 cron_job = "@daily"
+
+# Seconds to wait between bill ID API calls (rate limiting).
 wait_time = 120
+
+# Optional. How long to keep on-disk sent-outage cache files (Go duration).
+# Defaults to 168h (7 days) when omitted.
+# delete_duration_period = "168h"
+
+# Bearer token from https://uiapi.saapa.ir
 auth_token = ""
 
 
 [smtp.gmail]
 mail = ""
+from = ""
 host = "smtp.gmail.com"
 port = "587"
 username = ""
@@ -13,6 +27,7 @@ password = ""
 auth_method = "plain"
 identity = ""
 skip_tls = true
+# transport = "smtp"   # default; use "ews" for Exchange Web Services over HTTPS
 
 # Optional: route SMTP through a SOCKS5 proxy.
 # Remove or leave host empty to connect directly.
@@ -27,6 +42,7 @@ skip_tls = true
 # when the SMTP port is blocked/throttled but EWS/OWA is reachable.
 # [smtp.exchange]
 # mail = ""
+# from = ""
 # host = "mail.example.com"       # used to build https://<host>/EWS/Exchange.asmx
 # username = "DOMAIN\\user"       # NTLM credentials
 # password = ""
@@ -35,7 +51,14 @@ skip_tls = true
 # ews_url = ""                    # optional override of the default EWS endpoint
 
 [clients.my_client]
-smtp_name = "gmail"
+# Must match the [smtp.<name>] table key above (e.g. "gmail").
+smtp = "gmail"
+
+# Prefer bill_ids for one or more bills. bill_id alone still works.
 bill_id = ""
-bill_ids = ["", ""]
+bill_ids = [""]
+
+# Recipients of calendar invites. When cron_job is set, adding addresses
+# here only emails the newcomers for already-known outages; same-day
+# outage time changes send an update to everyone currently listed.
 recipients = [""]

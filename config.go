@@ -87,13 +87,24 @@ const (
 
 var mailTransportValues = []mailTransport{mailTransportSMTP, mailTransportEWS}
 
-func ParseConfig() (*Config, error) {
+// ParseConfig parses CLI flags and loads the config file. It returns the
+// parsed config and the config file path so scheduled jobs can reload it.
+func ParseConfig() (*Config, string, error) {
 	var configFilePath string
 	flag.StringVar(&configFilePath, "file", "config.toml", "config file(toml formatted)")
 	flag.Parse()
 
+	config, err := LoadConfig(configFilePath)
+	if err != nil {
+		return nil, "", err
+	}
+	return config, configFilePath, nil
+}
+
+// LoadConfig reads and validates a TOML config from path.
+func LoadConfig(path string) (*Config, error) {
 	config := new(Config)
-	if _, err := toml.DecodeFile(configFilePath, config); err != nil {
+	if _, err := toml.DecodeFile(path, config); err != nil {
 		return nil, err
 	}
 

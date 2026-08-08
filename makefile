@@ -58,11 +58,16 @@ clean:
 releaser:
 	goreleaser release --snapshot --clean
 
+.PHONY: docker
+docker:
+	docker build -t barghman:latest .
+
 .PHONY: help
 help:
 	@echo "Available targets:"
 	@echo "  build     - Build the binary"
 	@echo "  install   - Build and install the service"
 	@echo "  uninstall - Remove the service, binary"
-	@echo "	 releaser  - Generate release files"
+	@echo "  releaser  - Generate release files"
+	@echo "  docker    - Build a Docker image (barghman:latest)"
 	@echo "  clean     - Remove build artifacts and cache"

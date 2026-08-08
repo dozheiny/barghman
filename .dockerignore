@@ -1,0 +1,15 @@
+.git
+.github
+.vscode
+*.toml
+!example.toml
+barghman
+test_data
+man
+systemd
+*.md
+LICENSE
+install.sh
+makefile
+.goreleaser.yml
+.dockerignore

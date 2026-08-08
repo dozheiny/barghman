@@ -43,7 +43,15 @@ func (f *FileContent) Write(file *os.File) error {
 		return err
 	}
 
-	if _, err := file.WriteAt(content, 0); err != nil {
+	if err := file.Truncate(0); err != nil {
+		slog.Error("Failed to truncate cache file", "error", err)
+		return err
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		slog.Error("Failed to seek cache file", "error", err)
+		return err
+	}
+	if _, err := file.Write(content); err != nil {
 		slog.Error("Failed to write content into file", "error", err)
 		return err
 	}

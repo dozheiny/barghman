@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"os"
 	"time"
@@ -39,12 +39,18 @@ func DeleteCacheFunc(cachePathDir string, period time.Duration) func() {
 	}
 }
 
-func MailerFunc(cachePathDir string, config Config, location *time.Location) func() {
+func MailerFunc(cachePathDir, configPath string, location *time.Location) func() {
 	return func() {
 		slog.Debug("job started")
 
-		for subject, c := range config.Clients {
+		config, err := LoadConfig(configPath)
+		if err != nil {
+			slog.Error("Failed to reload config", "error", err, "path", configPath)
+			return
+		}
+		slog.SetLogLoggerLevel(slog.Level(config.LogLevel))
 
+		for subject, c := range config.Clients {
 			smtp, ok := config.SMTP[c.SMTP]
 			if !ok {
 				slog.Error("Cannot map between smtp config and client config", "smtp name", c.SMTP)
@@ -61,63 +67,8 @@ func MailerFunc(cachePathDir string, config Config, location *time.Location) fun
 				}
 
 				for _, d := range data {
-					startDate, endDate, err := d.ParseTime(location)
-					if err != nil {
-						slog.Error("Failed to parse time", "error", err)
-						continue
-					}
-
-					f, err := LoadOrCreateFile(cachePathDir, billID, d.OutageNumber, startDate)
-					if err != nil {
-						slog.Error("couldn't load or create file", "error", err)
-						continue
-					}
-
-					defer f.Close()
-
-					var fileData []byte
-					scanner := bufio.NewScanner(f)
-					for scanner.Scan() {
-						fileData = append(fileData, scanner.Bytes()...)
-					}
-
-					if err := scanner.Err(); err != nil {
-						slog.Error("scanner returns error", "error", err)
-						continue
-					}
-
-					fcf := new(FileContent)
-					var sequence uint
-
-					if len(fileData) != 0 {
-						if err := json.Unmarshal(fileData, fcf); err != nil {
-							slog.Error("decode the file data failed", "error", err)
-							continue
-						}
-
-						// Checks that the file loaded the start and end datetime is changed or not.
-						// If it doesn't changes, ignore it; If it changes, update it.
-						if fcf.StartOutageDateTime.Equal(startDate) || fcf.EndOutageDateTime.Equal(endDate) {
-							slog.Info("This data is already sent as email", "file name", fcf.FileName())
-							continue
-						}
-
-						sequence = fcf.Sequence + 1
-					}
-
-					fcf, err = d.ToFileContent(location, billID, c.Recipients, sequence)
-					if err != nil {
-						slog.Error("Failed to convert data to file content", "error", err)
-						continue
-					}
-
-					if err := mail.Do(fcf, subject); err != nil {
-						slog.Error("Failed to send mail", "error", err)
-						continue
-					}
-
-					if err := fcf.Write(f); err != nil {
-						slog.Error("Failed to cache data", "error", err)
+					if err := processOutage(cachePathDir, location, mail, subject, billID, c.Recipients, d); err != nil {
+						slog.Error("Failed to process outage", "error", err, "bill_id", billID, "outage_number", d.OutageNumber)
 					}
 				}
 
@@ -127,4 +78,75 @@ func MailerFunc(cachePathDir string, config Config, location *time.Location) fun
 
 		slog.Debug("all clients sent, waiting for next cron cycle")
 	}
+}
+
+func processOutage(cachePathDir string, location *time.Location, mail Mail, subject, billID string, recipients []string, d Data) error {
+	startDate, endDate, err := d.ParseTime(location)
+	if err != nil {
+		slog.Error("Failed to parse time", "error", err)
+		return err
+	}
+
+	f, err := LoadOrCreateFile(cachePathDir, billID, d.OutageNumber, startDate)
+	if err != nil {
+		slog.Error("couldn't load or create file", "error", err)
+		return err
+	}
+	defer f.Close()
+
+	cached, hasCache, err := readCacheContent(f)
+	if err != nil {
+		slog.Error("couldn't read cache file", "error", err)
+		return err
+	}
+
+	decision := DecideOutageSend(cached, hasCache, startDate, endDate, recipients)
+	if decision.Action == OutageSendSkip {
+		slog.Info("This data is already sent as email", "file name", FileName(billID, d.OutageNumber, startDate))
+		return nil
+	}
+
+	fcf, err := d.ToFileContent(location, billID, decision.Recipients, decision.Sequence)
+	if err != nil {
+		slog.Error("Failed to convert data to file content", "error", err)
+		return err
+	}
+
+	kind := MailKindNew
+	if decision.Action == OutageSendUpdate {
+		kind = MailKindUpdate
+	}
+
+	if err := mail.Do(fcf, subject, kind); err != nil {
+		slog.Error("Failed to send mail", "error", err)
+		return err
+	}
+
+	// Persist the full current recipient list so removals and additions stick.
+	fcf.Recipients = copyStrings(recipients)
+	if err := fcf.Write(f); err != nil {
+		slog.Error("Failed to cache data", "error", err)
+		return err
+	}
+	return nil
+}
+
+func readCacheContent(f *os.File) (*FileContent, bool, error) {
+	if _, err := f.Seek(0, 0); err != nil {
+		return nil, false, err
+	}
+
+	fileData, err := io.ReadAll(f)
+	if err != nil {
+		return nil, false, err
+	}
+	if len(fileData) == 0 {
+		return nil, false, nil
+	}
+
+	fcf := new(FileContent)
+	if err := json.Unmarshal(fileData, fcf); err != nil {
+		return nil, false, err
+	}
+	return fcf, true, nil
 }

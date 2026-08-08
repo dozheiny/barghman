@@ -13,6 +13,14 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// MailKind selects the subject/body wording for an outage email.
+type MailKind int
+
+const (
+	MailKindNew MailKind = iota
+	MailKindUpdate
+)
+
 var (
 	MailHeadersFormat = "From: %s <%s>\r\n" + // Name and Email
 		"To: %s\r\n" + // To.
@@ -21,18 +29,18 @@ var (
 		"MIME-Version: 1.0\r\n" + // MIME-Version.
 		"Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\n" // Boundary.
 
+	MailHeadersUpdateFormat = "From: %s <%s>\r\n" +
+		"To: %s\r\n" +
+		"Bcc: %s\r\n" +
+		"Subject: Updated Scheduled Power Outage on %s - %s\r\n" +
+		"MIME-Version: 1.0\r\n" +
+		"Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\n"
+
 	CalendarHeaderContent = "--%s\r\n" +
 		"Content-Type: text/calendar; method=REQUEST; charset=\"UTF-8\"; name=\"calendar.ics\"\r\n" +
 		"Content-Transfer-Encoding: 7bit\r\n" +
-		"Content-Disposition: attachment; filename=\"calendar.ics\"\r\n\r\n" +
+		"Content-Disposition: inline; filename=\"invite.ics\"\r\n\r\n" +
 		"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Blu//Barghman Calendar//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:REQUEST\r\n"
-
-	textContent = "--%s\r\n" + // boundary
-		"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
-		"Content-Transfer-Encoding: 7bit\r\n\r\n" +
-		"Greetings\r\nYou are receiving this email due to expected recurring power outages in the coming days.\r\n" +
-		"You can click on the attached calendar.ics file to add the possible outage schedule to your calendar.\r\n" +
-		"We hope that in the near future, you wont have to receive emails like this.\r\n\r\n"
 
 	CalendarFooterContent = "STATUS:CONFIRMED\r\nTRANSP:OPAQUE\r\nPRIORITY:5\r\nEND:VEVENT\r\n\r\n"
 
@@ -77,11 +85,17 @@ func NewMailClient(config SMTP, loc *time.Location) Mail {
 	return Mail{Auth: auth, Config: config, Loc: loc}
 }
 
-func (m Mail) Do(fc *FileContent, subject string) error {
+func (m Mail) Do(fc *FileContent, subject string, kind MailKind) error {
 	boundary := generateBoundary()
 
+	headersFormat := MailHeadersFormat
+	if kind == MailKindUpdate {
+		headersFormat = MailHeadersUpdateFormat
+	}
+
 	var content strings.Builder
-	if _, err := content.WriteString(fmt.Sprintf(MailHeadersFormat,
+	if _, err := content.WriteString(fmt.Sprintf(
+		headersFormat,
 		m.Config.From,
 		m.Config.Mail,
 		m.Config.Mail,
@@ -94,7 +108,7 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 		return err
 	}
 
-	if _, err := content.WriteString(fmt.Sprintf(textContent, boundary)); err != nil {
+	if _, err := content.WriteString(plainTextPart(boundary, fc, kind)); err != nil {
 		slog.Error("Failed to write text content", "error", err)
 		return err
 	}
@@ -104,7 +118,8 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 		return err
 	}
 
-	if _, err := content.WriteString(fmt.Sprintf(CalendarBodyFormat,
+	if _, err := content.WriteString(fmt.Sprintf(
+		CalendarBodyFormat,
 		fmt.Sprintf("%d", fc.OutageNumber),
 		time.Now().UTC().Format(emailTimeFormat),
 		fc.StartOutageDateTime.UTC().Format(emailTimeFormat),
@@ -139,6 +154,57 @@ func (m Mail) Do(fc *FileContent, subject string) error {
 	slog.Debug("content generated", "content", cont)
 
 	return m.Send(cont, fc.Recipients)
+}
+
+// plainTextPart builds the human-readable MIME part: what the mail is, why
+// the recipient got it, outage details, and how to add the invite to a calendar.
+func plainTextPart(boundary string, fc *FileContent, kind MailKind) string {
+	var intro string
+	switch kind {
+	case MailKindUpdate:
+		intro = "This is an update from Barghman: the planned power outage schedule has changed.\r\n" +
+			"Please replace the previous calendar entry with the new invite attached to this email."
+	default:
+		intro = "This is a notification from Barghman about a planned power outage for your electricity bill.\r\n" +
+			"You are receiving it because your email address is listed as a recipient for this account."
+	}
+
+	details := fmt.Sprintf(
+		"Outage details:\r\n"+
+			"  Address: %s\r\n"+
+			"  Date: %s\r\n"+
+			"  From: %s\r\n"+
+			"  Until: %s\r\n"+
+			"  Reason: %s",
+		fc.Address,
+		fc.FarsiOutageDate,
+		fc.StartOutageDateTime.Format(time.TimeOnly),
+		fc.EndOutageDateTime.Format(time.TimeOnly),
+		fc.ReasonOutage,
+	)
+
+	howTo := "How to add this to your calendar:\r\n" +
+		"  1. Open the attached invite.ics (or calendar.ics) file, or use Accept / Add to calendar in your mail client.\r\n" +
+		"  2. Confirm the event in Google Calendar, Outlook, Apple Calendar, or any app that supports .ics invites.\r\n" +
+		"  3. If you already have this outage and this message is an update, accept the new invite so the times are replaced."
+
+	closing := "We hope that in the near future you will not have to receive emails like this."
+
+	return fmt.Sprintf(
+		"--%s\r\n"+
+			"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
+			"Content-Transfer-Encoding: 7bit\r\n\r\n"+
+			"Greetings\r\n\r\n"+
+			"%s\r\n\r\n"+
+			"%s\r\n\r\n"+
+			"%s\r\n\r\n"+
+			"%s\r\n\r\n",
+		boundary,
+		intro,
+		details,
+		howTo,
+		closing,
+	)
 }
 
 func (m Mail) Send(msg string, recipients []string) error {
